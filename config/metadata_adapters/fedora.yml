@@ -1,0 +1,4 @@
+enabled: true
+fedora: 
+  url: http://localhost:8984/rest
+  base_path: valkyrie_benchmark_fedora

@@ -1,0 +1,4 @@
+enabled: true
+db:
+  adapter: sqlite3
+  database: db/ar_sqlite.sqlite3

@@ -1,0 +1,3 @@
+port: 8984
+fcrepo_home_dir: tmp/fcrepo-data
+download_dir: tmp

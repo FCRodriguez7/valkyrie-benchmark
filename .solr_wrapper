@@ -1,0 +1,8 @@
+port: 8983
+instance_dir: tmp/solr-data
+download_dir: tmp
+collection:
+  persist: true
+  solr_xml: solr/
+  name: valkyrie_benchmark
+  

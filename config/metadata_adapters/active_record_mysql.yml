@@ -1,0 +1,9 @@
+enabled: true
+db:
+  adapter: mysql2
+  host: localhost
+  port: 3306
+  encoding: utf8
+  database: valkyrie_benchmark_ar_mysql
+  username: valkyrie_benchmark
+  password: valkyrie_benchmark

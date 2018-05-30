@@ -1,0 +1,6 @@
+enabled: true
+redis:
+  cache_prefix: '_valkyrie_benchmark_'
+  expiration: nil
+  host: localhost
+  port: 6379
