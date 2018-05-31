@@ -3,6 +3,6 @@ instance_dir: tmp/solr-data
 download_dir: tmp
 collection:
   persist: true
-  solr_xml: solr/
+  dir: solr/config/
   name: valkyrie_benchmark
   
