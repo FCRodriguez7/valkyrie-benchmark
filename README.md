@@ -4,7 +4,7 @@ A framework to measure the performance of various back end adapters of [Valkyrie
 
 # Benchmarking results
 
-See [RESULTS.md](RESULTS.md)
+See [RESULTS.md](https://github.com/durham-university/valkyrie-benchmark/wiki/Benchmark-results)
 
 # Installation
 
