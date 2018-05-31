@@ -148,11 +148,11 @@ module ValkyrieBenchmark
       after_test(report.header)
       label = report.header.split(' - ',2)[1]
 
-      puts( "| %-30s | %s | (±%4.1f%%) | %s | %6.3f |" % [
+      puts( "| %-30s | %11.3f | (±%4.1f%%) | %11d | %6.3f |" % [
         label, 
-        Benchmark::IPS::Helpers.scale(report.iterations.to_f/report.runtime),
+        report.iterations.to_f/report.runtime,
         report.error_percentage,
-        Benchmark::IPS::Helpers.scale(report.iterations),
+        report.iterations,
         report.runtime
       ])
     end
