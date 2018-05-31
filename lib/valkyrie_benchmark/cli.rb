@@ -8,6 +8,8 @@ module ValkyrieBenchmark
     method_option :noadapters, aliases: ['-A'], desc: "Comma delimited list of adapters NOT to use"
     method_option :tests, aliases: ['-t'], desc: "Comma delimited list of tests to run"
     method_option :force, aliases: '-f', desc: "Force use of adapter or test even if it is not enabled"
+    method_option :time, desc: "Number of seconds to run each benchmark (default 5)"
+    method_option :warmup, desc: "Number of seconds to warmup each benchmark (default 2)"
     def start
       adapters = options[:adapters].try(:split,',').try(:map) do |a| 
         resolve_adapter(a) || puts("Couldn't resolve adapter #{a}")
@@ -33,7 +35,12 @@ module ValkyrieBenchmark
         return if found
       end
 
-      runner = ValkyrieBenchmark::Runner.new(metadata_adapters: adapters, test_suites: tests)
+      runner = ValkyrieBenchmark::Runner.new(
+        metadata_adapters: adapters, 
+        test_suites: tests,
+        benchmark_time: (options[:time] || 5.0).to_f,
+        warmup_time: (options[:warmup_time] || 2.0).to_f
+      )
       runner.run_all
       
     end

@@ -7,6 +7,8 @@ module ValkyrieBenchmark
       @metadata_adapters = options[:metadata_adapters] || ValkyrieBenchmark.enabled_metadata_adapters
       @test_suites = options[:test_suites] || ValkyrieBenchmark.enabled_test_suites
       @header_printed = false
+      @benchmark_time = options[:benchmark_time] || 5.0
+      @warmup_time = options[:warmup_time] || 2.0
     end
   
     def run_test_suite(test_suite_class)
@@ -25,6 +27,8 @@ module ValkyrieBenchmark
         Benchmark.ips(quiet: true) do |benchmark|
           #benchmark.instance_variable_set(:@stdout, ReducedOutput.new)
           benchmark.config(suite: ips_suite)
+          benchmark.time = @benchmark_time
+          benchmark.warmup = @warmup_time
           test_suites.each do |suite|
             benchmark.report(ips_suite.next_item(suite, test, suite.benchmark_metadata_adapter.adapter_key)) do
               suite.send(test.to_sym)
@@ -137,7 +141,7 @@ module ValkyrieBenchmark
 
     def running(label, time)
       connect_adapter(label)
-      # Before_test checks if it's already been run, which will have unless warmup is disabled.
+      # Before_test checks if it's already been run, which it will have unless warmup is disabled.
       before_test(label) 
     end
 
