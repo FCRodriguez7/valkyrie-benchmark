@@ -1,0 +1,7 @@
+enabled: true
+db: 
+  host: localhost
+  port: 5433
+  database: valkyrie_benchmark_sequel_postgres
+  user: valkyrie_benchmark
+  password: valkyrie_benchmark

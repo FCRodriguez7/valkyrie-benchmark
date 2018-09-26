@@ -72,6 +72,20 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 Then try migrations again the normal way.
 
+## Sequel Postgres
+
+Again, very similar to the previous two Postgres based adapters. Just create a new database in psql client (```sudo -u postgres psql```). Assuming you've already created the user just run
+
+```sql
+create database valkyrie_benchmark_sequel_postgres owner = valkyrie_benchmark;
+```
+
+Then run migrations
+
+```bundle exec bin/benchmark migrate sequel_postgres```
+
+Same as last adapter, you may need to create the ```uuid-ossp``` extension manually if there is a permissions problem
+
 ## Fedora
 
 Easiest method is to use the ``fcrepo_wrapper``. You only need to run ```bundle exec fcrepo_wrapper``` in a separate console window and leave it running. No migrations need to be run.

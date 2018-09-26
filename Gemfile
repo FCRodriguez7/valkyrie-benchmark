@@ -9,3 +9,4 @@ else
   gem 'valkyrie-activerecord', github: 'durham-university/valkyrie-activerecord'
 end
 gem 'valkyrie-redis', github: 'samvera-labs/valkyrie-redis'
+gem 'valkyrie-sequel', github: 'samvera-labs/valkyrie-sequel'
