@@ -1,6 +1,8 @@
 enabled: true
 db: 
   adapter: postgresql
+  host: localhost
+  port: 5433
   database: valkyrie_benchmark_postgres
   encoding: unicode
   username: valkyrie_benchmark
