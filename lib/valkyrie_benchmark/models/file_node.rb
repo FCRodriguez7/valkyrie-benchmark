@@ -1,7 +1,6 @@
 module ValkyrieBenchmark
   module Models
     class FileNode < Valkyrie::Resource
-      attribute :id, Valkyrie::Types::ID.optional
       attribute :title, Valkyrie::Types::Array
       attribute :mime_type, Valkyrie::Types::Array
       attribute :checksum, Valkyrie::Types::Array

@@ -1,7 +1,6 @@
 module ValkyrieBenchmark
   module Models
     class Book < Valkyrie::Resource
-      attribute :id, Valkyrie::Types::ID.optional
       attribute :alternate_ids, Valkyrie::Types::Array.of(Valkyrie::Types::ID)
       attribute :title, Valkyrie::Types::Array
       attribute :date, Valkyrie::Types::Array
