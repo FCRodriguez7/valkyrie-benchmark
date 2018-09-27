@@ -4,10 +4,12 @@ module ValkyrieBenchmark
 
       attr_accessor :benchmark_metadata_adapter
       attr_accessor :benchmark_group
+      attr_accessor :clean_tests
 
       def initialize(benchmark_metadata_adapter, options={})
         self.benchmark_metadata_adapter = benchmark_metadata_adapter
         self.benchmark_group = options[:benchmark_group] || config[:benchmark_group] || (benchmark_metadata_adapter.adapter_key)
+        self.clean_tests = options[:clean_tests] || false
       end
 
       def metadata_adapter
@@ -23,10 +25,21 @@ module ValkyrieBenchmark
       end
 
       def before_test_suite
-        benchmark_metadata_adapter.clean
+        clean!
       end
 
       def after_test_suite
+      end
+
+      def clean!
+        benchmark_metadata_adapter.clean
+      end
+
+      def before_every_test(test)
+        clean! if clean_tests?
+      end
+
+      def after_every_test(test)
       end
 
       def run_tests(benchmark)
@@ -40,6 +53,7 @@ module ValkyrieBenchmark
       end
 
       def run_test(test, benchmark)
+        before_every_test(test)
         self.send(:"before_#{test}") if self.respond_to?(:"before_#{test}")
 
         benchmark.report(benchmark_group) do
@@ -47,6 +61,7 @@ module ValkyrieBenchmark
         end
 
         self.send(:"after_#{test}") if self.respond_to?(:"after_#{test}")
+        after_every_test(test)
       end
 
       def suite_name
@@ -80,6 +95,10 @@ module ValkyrieBenchmark
 
       def enabled?
         self.class.enabled?
+      end
+
+      def clean_tests?
+        clean_tests
       end
 
       def self.enabled?

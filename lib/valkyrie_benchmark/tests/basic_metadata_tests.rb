@@ -22,7 +22,17 @@ Nulla facilisi. Aliquam scelerisque rhoncus porta. Fusce congue viverra quam ull
 
 Donec vitae feugiat nisi, eget rutrum massa. Nullam eu blandit dui, nec fringilla tortor. Sed sollicitudin ligula a sapien semper placerat. Proin et lacus ut ligula eleifend hendrerit sed a eros. Nullam vel mauris ut felis convallis convallis eu at nisi. In porta in urna quis posuere. Cras non est erat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam tempor sem et magna dictum tristique. Morbi eu ante cursus, cursus leo at, placerat velit. In congue dignissim metus, id malesuada ante pulvinar vel.
 """
+        @num_update_items = config.fetch(:num_update_items, 100)
+        @num_delete_items = config.fetch(:num_update_items, 300)
+
         super
+      end
+
+      def clean!
+        super
+        @stub_items = []
+        @text_items = []
+        @big_items = []
       end
 
       def tests
@@ -55,7 +65,7 @@ Donec vitae feugiat nisi, eget rutrum massa. Nullam eu blandit dui, nec fringill
       end
 
       def before_update_stub
-        create_stub while @stub_items.length < 10
+        create_stub while @stub_items.length < @num_update_items
         @counter = 0
       end
 
@@ -67,7 +77,7 @@ Donec vitae feugiat nisi, eget rutrum massa. Nullam eu blandit dui, nec fringill
       end
 
       def before_update_with_text
-        create_with_text while @text_items.length < 10
+        create_with_text while @text_items.length < @num_update_items
         @counter = 0
       end
 
@@ -79,7 +89,7 @@ Donec vitae feugiat nisi, eget rutrum massa. Nullam eu blandit dui, nec fringill
       end
 
       def before_update_with_many_fields
-        create_with_many_fields while @big_items.length < 10
+        create_with_many_fields while @big_items.length < @num_update_items
         @counter = 0
       end
 
@@ -99,7 +109,7 @@ Donec vitae feugiat nisi, eget rutrum massa. Nullam eu blandit dui, nec fringill
       end
 
       def before_delete_stubs
-        create_stub while @stub_items.length < 300
+        create_stub while @stub_items.length < @num_delete_items
         @total_count = @stub_items.length
         @start_time = nil
         @sleep_time = nil
@@ -120,7 +130,7 @@ Donec vitae feugiat nisi, eget rutrum massa. Nullam eu blandit dui, nec fringill
       end
 
       def before_delete_with_many_fields
-        create_with_many_fields while @big_items.length < 300
+        create_with_many_fields while @big_items.length < @num_delete_items
         @total_count = @big_items.length
         @start_time = nil
         @sleep_time = nil

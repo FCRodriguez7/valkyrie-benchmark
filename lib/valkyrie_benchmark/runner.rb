@@ -11,9 +11,9 @@ module ValkyrieBenchmark
       @warmup_time = options[:warmup_time] || 2.0
     end
   
-    def run_test_suite(test_suite_class)
+    def run_test_suite(test_suite_class, test_suite_options={})
       print_header unless @header_printed
-      test_suites = @metadata_adapters.map do |adapter| test_suite_class.new(adapter) end
+      test_suites = @metadata_adapters.map do |adapter| test_suite_class.new(adapter, test_suite_options) end
   
       test_suites.each do |suite|
         connect_adapter(suite)
@@ -40,7 +40,7 @@ module ValkyrieBenchmark
 
       test_suites.each do |suite|
         connect_adapter(suite)
-        suite.checks if suite.respond_to?(:checks)
+        suite.checks if suite.respond_to?(:checks) && !suite.clean_tests?
         suite.after_test_suite
       end
   
@@ -49,9 +49,9 @@ module ValkyrieBenchmark
     def register_test(ips_suite, benchmark, test_suite, test, label)
     end
   
-    def run_all
+    def run_all(test_suite_options={})
       @test_suites.each do |test_suite_class|
-        run_test_suite(test_suite_class)
+        run_test_suite(test_suite_class, test_suite_options)
       end
     end
 
@@ -126,12 +126,14 @@ module ValkyrieBenchmark
       test_struct[2] = true
       test_suite = test_struct[0]
       test = test_struct[1]
+      test_suite.send(:before_every_test, test) if test_suite.respond_to?(:before_every_test)
       test_suite.send(:"before_#{test}") if test_suite.respond_to?(:"before_#{test}")
     end
 
     def after_test(label)
       test_suite, test, _ = test_for(label)
       test_suite.send(:"after_#{test}") if test_suite.respond_to?(:"after_#{test}")
+      test_suite.send(:after_every_test, test) if test_suite.respond_to?(:after_every_test)
     end
 
     def warming(label, time)

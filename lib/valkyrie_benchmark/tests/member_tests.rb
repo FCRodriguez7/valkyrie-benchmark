@@ -8,13 +8,25 @@ module ValkyrieBenchmark
 
       def before_test_suite
         @num_children = config.fetch(:num_children, 100)
+        @num_parents = config.fetch(:num_children, 50)
         @children = []
         @parents = []
+        @unique_pages = []
+        @last_page = nil
         super
       end
 
+      def clean!
+        super
+        @children = []
+        @parents = []
+        @unique_pages = []
+        @last_page = nil
+      end
+      
+
       def tests
-        [:create_parent, :reload_parent, :update_child, :update_parent, :one_more_page, :remove_page, :find_parents, :find_members]
+        [:create_parent, :reload_parent, :update_child, :update_parent, :find_parents, :find_members, :one_more_page, :remove_page]
       end
 
       # This isn't run as a test as it's just simple resource creation. This will be tested
@@ -41,7 +53,7 @@ module ValkyrieBenchmark
 
       def before_reload_parent
         before_create_parent if @parents.empty?
-        create_parent while @parents.length < 10
+        create_parent while @parents.length < @num_parents
         @counter = 0
       end
 
@@ -52,7 +64,8 @@ module ValkyrieBenchmark
       end
 
       def before_update_child
-        create_child while @children.length < 10
+        before_create_parent if @parents.empty?
+        create_parent while @parents.length < @num_parents
         @counter = 0
       end
 
@@ -65,7 +78,7 @@ module ValkyrieBenchmark
 
       def before_update_parent
         before_create_parent if @parents.empty?
-        create_parent while @parents.length < 10
+        create_parent while @parents.length < @num_parents
         @counter = 0
       end
 
@@ -77,22 +90,28 @@ module ValkyrieBenchmark
       end
 
       def before_find_parents
-        begin before_create_parent ; create_parent end if @parents.empty?
-        @update_parent = @parents.first
-        # This page is a member of only one parent
-        @unique_page = ValkyrieBenchmark::Models::Page.new(title: 'unique page')
-        @unique_page = metadata_adapter.persister.save(resource: @unique_page)
-        @update_parent.member_ids += [@unique_page.id]
-        @update_parent = persister.save(resource: @update_parent)
+        before_create_parent if @parents.empty?
+        create_parent while @parents.length < @num_parents
+        @unique_pages = (0..(@num_parents-1)).map do |i|
+          # Create some pages which only belong to one parent
+          @update_parent = @parents[i]
+          page = ValkyrieBenchmark::Models::Page.new(title: "unique page #{i}")
+          page = metadata_adapter.persister.save(resource: page)
+          @update_parent.member_ids += [page.id]
+          @update_parent = persister.save(resource: @update_parent)
+          page
+        end
+        @counter = 0
       end
 
       def find_parents
-        @queried_parents = query_service.find_parents(resource: @unique_page).to_a
+        @queried_parents = query_service.find_parents(resource: @unique_pages[@counter % @num_parents]).to_a
+        @counter += 1
       end      
 
       def before_one_more_page
         before_create_parent if @parents.empty?
-        create_parent while @parents.length < 10
+        create_parent while @parents.length < @num_parents
         @last_page = ValkyrieBenchmark::Models::Page.new(title: 'last page')
         @last_page = metadata_adapter.persister.save(resource: @last_page)
         @counter = 0
@@ -107,7 +126,7 @@ module ValkyrieBenchmark
 
       def before_remove_page
         before_create_parent if @parents.empty?
-        create_parent while @parents.length < 10
+        create_parent while @parents.length < @num_parents
         @remove_index = (@num_children / 2).to_i
         @counter = 0
       end
@@ -122,25 +141,17 @@ module ValkyrieBenchmark
       end
 
       def before_find_members
-        # Make sure we have some parents with a predictable number of members in them
-        before_create_parent if @parents.empty?
-        10.times do create_parent end
+        clean! unless @parents.empty?
+        before_create_parent
+        create_parent while @parents.length < @num_parents
         @counter = 0
       end
 
       def find_members
-        @update_parent = @parents[-1-(@counter % 10)]
+        @update_parent = @parents[@counter % @parents.length]
         @queried_members = query_service.find_members(resource: @update_parent).to_a
       end
 
-      def checks
-        @parent = query_service.find_by(id: @parents[0].id)
-        @queried_members = query_service.find_members(resource: @parent).to_a
-        raise "Parent title not updated" if @parent.title.first.start_with?('book')
-        raise "Wrong parent found" unless @queried_parents.count == 1 && @queried_parents.first.id.to_s == @parent.id.to_s
-        raise 'Added page not present' unless @queried_members.find do |m| m.title.first == "last page" end
-        raise 'Deleted page still present' if @queried_members.find do |m| m.title.first.start_with?("page #{@remove_index}") end
-      end
     end
   end
 end

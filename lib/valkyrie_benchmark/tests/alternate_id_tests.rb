@@ -12,6 +12,11 @@ module ValkyrieBenchmark
         super
       end
 
+      def clean!
+        super
+        @items = []
+      end
+
       def tests
         [:create, :find]
       end

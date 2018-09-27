@@ -4,20 +4,22 @@ module ValkyrieBenchmark
   class CLI < Thor
 
     desc "start", "Runs benchmarks"
-    method_option :adapters, aliases: ['-a'], desc: "Comma delimited list of adapters to use"
-    method_option :noadapters, aliases: ['-A'], desc: "Comma delimited list of adapters NOT to use"
-    method_option :tests, aliases: ['-t'], desc: "Comma delimited list of tests to run"
-    method_option :force, aliases: '-f', desc: "Force use of adapter or test even if it is not enabled"
-    method_option :time, desc: "Number of seconds to run each benchmark (default 5)"
-    method_option :warmup, desc: "Number of seconds to warmup each benchmark (default 2)"
+    method_option :adapters, aliases: ['-a'], type: :array, desc: "List of adapters to use"
+    method_option :noadapters, aliases: ['-A'], type: :array, desc: "List of adapters NOT to use"
+    method_option :tests, aliases: ['-t'], type: :array, desc: "List of tests to run"
+    method_option :force, aliases: '-f', type: :boolean, default: false, desc: "Force use of adapter or test even if it is not enabled"
+    method_option :time, type: :numeric, default: 5.0, desc: "Number of seconds to run each benchmark"
+    method_option :warmup, type: :numeric, default: 2.0, desc: "Number of seconds to warmup each benchmark"
+    method_option :clean, aliases: ['-c'], type: :boolean, default: true, desc: "Clean and prepare database between every test. Increases runtime but gives more consistent results."
+    method_option :"test-options", type: :hash, desc: "Options to pass the test suites."
     def start
-      adapters = options[:adapters].try(:split,',').try(:map) do |a| 
+      adapters = options[:adapters].try(:map) do |a| 
         resolve_adapter(a) || puts("Couldn't resolve adapter #{a}")
       end || ValkyrieBenchmark.enabled_metadata_adapters
-      options[:noadapters].try(:split,',').try(:each) do |exclude|
+      options[:noadapters].try(:each) do |exclude|
         adapters.delete_if do |a| resolve_adapter(exclude) == a end
       end
-      tests = options[:tests].try(:split,',').try(:map) do |t| 
+      tests = options[:tests].try(:map) do |t| 
         resolve_test_suite(t) || puts("Couldn't resolve test suite #{t}")
       end || ValkyrieBenchmark.enabled_test_suites
       return if adapters.any?(&:nil?) || tests.any?(&:nil?)
@@ -35,13 +37,15 @@ module ValkyrieBenchmark
         return if found
       end
 
+      test_suite_options = {clean_tests: options[:clean]}.merge((options[:"test-options"] || {}).symbolize_keys)
+
       runner = ValkyrieBenchmark::Runner.new(
         metadata_adapters: adapters, 
         test_suites: tests,
-        benchmark_time: (options[:time] || 5.0).to_f,
-        warmup_time: (options[:warmup_time] || 2.0).to_f
+        benchmark_time: options[:time].to_f,
+        warmup_time: options[:warmup_time].to_f
       )
-      runner.run_all
+      runner.run_all(test_suite_options)
       
     end
 
