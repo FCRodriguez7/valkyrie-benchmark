@@ -3,8 +3,10 @@ module ValkyrieBenchmark
   module MetadataAdapters
     class SequelPostgres < BaseAdapter
 
-      def valkyrie_adapter
-        @valkyrie_adapter ||= Valkyrie::Sequel::MetadataAdapter.new(config['db'].symbolize_keys)
+      def valkyrie_adapter        
+        @valkyrie_adapter ||= Valkyrie::Sequel::MetadataAdapter.new(
+          connection: Sequel.connect(config['db'].symbolize_keys.merge(adapter: :postgres))
+        )
       end
 
       def migrate
